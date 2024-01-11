@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const dbusername = encodeURIComponent('sapien_user')
-const dbpassword = encodeURIComponent('sapieneleven@2024');
-mongoose.connect(`mongodb://${dbusername}:${dbpassword}@127.0.0.1:27017/acr?authSource=admin`,
+const dbusername = encodeURIComponent('AdminSapienEleven')
+const dbpassword = encodeURIComponent('SapienEleven@2024');
+mongoose.connect(`mongodb://${dbusername}:${dbpassword}@162.247.131.12:27017/sapieneleven?authSource=admin`,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
