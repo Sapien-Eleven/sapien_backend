@@ -3,9 +3,11 @@ const Counters = require('../model/Counter');
 const md5 = require("md5");
 
 exports.signup = async (req, res) => {
+    const name = req.body.name;
     const email = req.body.email;
     const password = md5(req.body.password);
-    const newUser = Users({ _id: await getNextSequenceValue('users'), email, password});
+    const registered_at = (new Date()).toLocaleString('en-US', {hour12: false});
+    const newUser = Users({ _id: await getNextSequenceValue('users'), name, email, password, registered_at});
     if ((await Users.find({email}, {_id: 0, __v: 0}).exec()).length > 0) {
         res.send({
             status: 'already exists',
