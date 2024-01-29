@@ -51,6 +51,21 @@ exports.login = async (req, res) => {
     }
 }
 
+exports.getUsers = async (req, res) => {
+    const users = await Users.find({}, {__v: 0}).exec();
+    if (users.length > 0) {
+        res.send({
+            status: 'success',
+            users
+        })
+    } else {
+        res.send({
+            status: 'empty',
+            comment: 'No user is registered'
+        })
+    }
+}
+
 const getNextSequenceValue = async (sequenceName) => {
     const sequenceDocument = await Counters.findOneAndUpdate(
         {_id: sequenceName},
