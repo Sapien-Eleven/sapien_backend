@@ -66,6 +66,53 @@ exports.getUsers = async (req, res) => {
     }
 }
 
+exports.getUserInfo = async (req, res) => {
+    const id = req.body.id;
+    const user = (await Users.find({_id: id}, {__v: 0}).exec())[0];
+    if (user !== undefined) {
+        res.send({
+            status: 'success',
+            user
+        })
+    } else {
+        res.send({
+            status: 'not registered',
+            comment: 'Please add this user'
+        })
+    }
+}
+
+exports.updateUser = async (req, res) => {
+    const id = req.body.id;
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    let result;
+
+    if (password === '') {
+        result = await Users.findOneAndUpdate({_id: id}, {
+            name,
+            email,
+        });
+    } else {
+        result = await Users.findOneAndUpdate({_id: id}, {
+            name,
+            email,
+            password: md5(password)
+        });
+    }
+    if (result !== undefined) {
+        res.send({
+            status: 'success'
+        })
+    } else {
+        res.send({
+            status: 'failed',
+            comment: 'Please try again'
+        })
+    }
+}
+
 const getNextSequenceValue = async (sequenceName) => {
     const sequenceDocument = await Counters.findOneAndUpdate(
         {_id: sequenceName},
