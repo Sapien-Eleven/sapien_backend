@@ -113,6 +113,20 @@ exports.updateUser = async (req, res) => {
     }
 }
 
+exports.deleteUser = async (req, res) => {
+    const id = req.body.id;
+    const email = req.body.email;
+    const result = await Users.findByIdAndDelete({_id: id, email}).exec();
+    if (result !== undefined) {
+        res.send({status: 'success'});
+    } else {
+        res.send({
+            status: 'failed',
+            comment: 'There is unexpected error.'
+        })
+    }
+}
+
 const getNextSequenceValue = async (sequenceName) => {
     const sequenceDocument = await Counters.findOneAndUpdate(
         {_id: sequenceName},
