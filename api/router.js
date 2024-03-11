@@ -8,5 +8,9 @@ router.post('/getUsers', Controller.getUsers)
 router.post('/getUserInfo', Controller.getUserInfo)
 router.post('/updateUser', Controller.updateUser)
 router.post('/deleteUser', Controller.deleteUser)
+router.post('/getWhitelists', Controller.getWhitelists)
+router.post('/addWalletAddress', Controller.addWalletAddress)
+router.post('/deleteWalletAddress', Controller.deleteWalletAddress)
+router.post('/updateWhitelist', Controller.updateWhitelist)
 
 module.exports = router;

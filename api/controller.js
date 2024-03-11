@@ -1,6 +1,8 @@
 const Users = require("../model/User");
+const Whitelists = require('../model/Whitelist');
 const Counters = require('../model/Counter');
 const md5 = require("md5");
+const moment = require("moment");
 
 exports.signup = async (req, res) => {
     const name = req.body.name;
@@ -124,6 +126,84 @@ exports.deleteUser = async (req, res) => {
             status: 'failed',
             comment: 'There is unexpected error.'
         })
+    }
+}
+
+exports.addWalletAddress = async (req, res) => {
+    const wallet_address = req.body.wallet_address;
+    const owner = req.body.owner;
+    const duration = req.body.duration;
+    const registered_at = moment().format('DD/MM/YYYY HH:m:s');
+    const expired_at = moment().add(duration, 'days').format('DD/MM/YYYY');
+    const newWalletAddress = Whitelists({wallet_address, owner, duration, expired_at, status: 1, registered_at});
+    if ((await Whitelists.find({wallet_address}, {__v: 0}).exec()).length > 0) {
+        res.send({
+            status: 'already existed',
+            comment: 'Wallet address is already whitelisted'
+        })
+    } else {
+        const result = await newWalletAddress.save();
+        if (result !== undefined) {
+            res.send({
+                status: 'success'
+            })
+        } else {
+            res.send({
+                status: 'unknown error',
+                comment: 'Unknown error found'
+            })
+        }
+    }
+}
+
+exports.getWhitelists = async (req, res) => {
+    const whitelists = await Whitelists.find({}, {__v: 0}).exec();
+    if (whitelists.length > 0) {
+        res.send({
+            status: 'success',
+            whitelists
+        })
+    } else {
+        res.send({
+            status: 'empty',
+            comment: 'No whitelisted wallet address'
+        })
+    }
+}
+
+exports.deleteWalletAddress = async (req, res) => {
+    const _id = req.body._id;
+    const wallet_address = req.body.wallet_address;
+    const result = await Whitelists.findByIdAndDelete({_id, wallet_address}).exec();
+    if (result !== undefined) {
+        res.send({status: 'success'})
+    } else {
+        res.send({
+            status: 'error',
+            comment: 'Unknown error found'
+        })
+    }
+}
+
+exports.updateWhitelist = async (req, res) => {
+    const wallet_address = req.body.wallet_address;
+    const owner = req.body.owner;
+    const duration = req.body.duration; 
+    const prev = await Whitelists.findOne({wallet_address}).exec();
+    let expired_at;
+    if (moment().isBefore(moment(prev.expired_at, 'DD/MM/YYYY HH:m:s').toDate())) {
+        expired_at = moment(moment(prev.registered_at, 'DD/MM/YYYY HH:m:s').toDate()).add(duration, 'days').format('DD/MM/YYYY');
+    } else {
+        expired_at = moment().add(duration, 'days').format('DD/MM/YYYY');
+    }
+    const result = await Whitelists.findOneAndUpdate({wallet_address}, {owner, duration, expired_at});
+    if (result !== undefined) {
+        res.send({status: 'success'});
+    } else {
+        res.send({
+            status: 'error',
+            comment: 'Unknown error found'
+        });
     }
 }
 
