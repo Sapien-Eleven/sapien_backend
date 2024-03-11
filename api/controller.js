@@ -191,7 +191,7 @@ exports.updateWhitelist = async (req, res) => {
     const duration = req.body.duration; 
     const prev = await Whitelists.findOne({wallet_address}).exec();
     let expired_at;
-    if (moment().isBefore(moment(prev.expired_at, 'DD/MM/YYYY HH:m:s').toDate())) {
+    if (moment().isBefore(moment(prev.expired_at, 'DD/MM/YYYY HH:m:s').toDate(), 'day')) {
         expired_at = moment(moment(prev.registered_at, 'DD/MM/YYYY HH:m:s').toDate()).add(duration, 'days').format('DD/MM/YYYY');
     } else {
         expired_at = moment().add(duration, 'days').format('DD/MM/YYYY');
@@ -204,6 +204,26 @@ exports.updateWhitelist = async (req, res) => {
             status: 'error',
             comment: 'Unknown error found'
         });
+    }
+}
+
+exports.checkWhitelisted = async (req, res) => {
+    const wallet_address = req.body.wallet_address;
+    const item = await Whitelists.findOne({wallet_address}).exec();
+    if (item !== undefined) {
+        if (moment().isBefore(moment(prev.expired_at, 'DD/MM/YYYY').toDate(), 'day')) {
+            res.send({status: 'success'})
+        } else {
+            res.send({
+                status: 'not whitelisted',
+                comment: 'This wallet address is not whitelisted'
+            })
+        }
+    } else {
+        res.send({
+            status: 'not whitelisted',
+            comment: 'This wallet address is not whitelisted'
+        })
     }
 }
 

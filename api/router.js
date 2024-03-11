@@ -12,5 +12,6 @@ router.post('/getWhitelists', Controller.getWhitelists)
 router.post('/addWalletAddress', Controller.addWalletAddress)
 router.post('/deleteWalletAddress', Controller.deleteWalletAddress)
 router.post('/updateWhitelist', Controller.updateWhitelist)
+router.post('/checkWhitelisted', Controller.checkWhitelisted)
 
 module.exports = router;
