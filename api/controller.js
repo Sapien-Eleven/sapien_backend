@@ -3,13 +3,17 @@ const Whitelists = require('../model/Whitelist');
 const Counters = require('../model/Counter');
 const md5 = require("md5");
 const moment = require("moment");
+const XAccounts = require("../model/XAccount");
 
 exports.signup = async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
+    const wallet_address = req.body.wallet_address;
+    const duration = req.body.duration;
     const password = md5(req.body.password);
     const registered_at = (new Date()).toLocaleString('en-US', {hour12: false});
-    const newUser = Users({ _id: await getNextSequenceValue('users'), name, email, password, registered_at});
+    const wl_expired_at = moment().add(duration, 'days').format('DD/MM/YYYY');
+    const newUser = Users({ _id: await getNextSequenceValue('users'), name, email, wallet_address, wl_expired_at, password, registered_at});
     if ((await Users.find({email}, {_id: 0, __v: 0}).exec()).length > 0) {
         res.send({
             status: 'already exists',
@@ -88,19 +92,41 @@ exports.updateUser = async (req, res) => {
     const id = req.body.id;
     const name = req.body.name;
     const email = req.body.email;
+    const wallet_address = req.body.wallet_address;
+    const duration = req.body.duration;
     const password = req.body.password;
     let result;
 
-    if (password === '') {
-        result = await Users.findOneAndUpdate({_id: id}, {
-            name,
-            email,
-        });
+    const user = await Users.findOne({_id: id}).exec();
+    let wl_expired_at;
+    if (!moment().isAfter(moment(user.wl_expired_at, 'DD/MM/YYYY HH:m:s').toDate(), 'day')) {
+        wl_expired_at = moment(moment(user.wl_expired_at, 'DD/MM/YYYY HH:m:s').toDate()).add(duration, 'days').format('DD/MM/YYYY');
     } else {
+        wl_expired_at = moment().add(duration, 'days').format('DD/MM/YYYY');
+    }
+
+    if (password === '' && wallet_address !== '') {
         result = await Users.findOneAndUpdate({_id: id}, {
             name,
             email,
-            password: md5(password)
+            wallet_address,
+            wl_expired_at
+        });
+    }
+    else if (wallet_address === '' && password !== '') {
+        result = await Users.findOneAndUpdate({_id: id}, {
+            name,
+            email,
+            password: md5(password),
+            wl_expired_at
+        });
+    }
+    else {
+        result = await Users.findOneAndUpdate({_id: id}, {
+            name,
+            email,
+            password: md5(password),
+            wl_expired_at
         });
     }
     if (result !== undefined) {
@@ -223,6 +249,51 @@ exports.checkWhitelisted = async (req, res) => {
         res.send({
             status: 'not whitelisted',
             comment: 'This wallet address is not whitelisted'
+        })
+    }
+}
+
+exports.addTwitterAccout = async (req, res) => {
+    const user_id = req.body.user_id;
+    const username = req.body.username;
+    const email = req.body.email;
+    const name = req.body.name;
+    const total_points = req.body.total_points;
+    const authorized_access = req.body.authorized_access;
+    const joined_at = req.body.joined_at;
+
+    const account = (await XAccounts.find({username}).exec());
+    if (account.length > 0) {
+        res.send({
+            status: 'existed',
+            comment: 'already existed'
+        })
+    } else {
+        const newAccount = XAccounts({user_id, username, name, email, total_points, authorized_access, joined_at});
+        const result = await newAccount.save();
+        if (result !== undefined) {
+            res.send({
+                status: 'success'
+            })
+        } else {
+            res.send({
+                status: 'Error Found'
+            })
+        }
+    }
+}
+
+exports.getTwitterAccounts = async (req, res) => {
+    const xaccounts = await XAccounts.find({}, {__v: 0}).exec();
+    if (xaccounts.length > 0) {
+        res.send({
+            status: 'success',
+            xaccounts
+        })
+    } else {
+        res.send({
+            status: 'empty',
+            comment: 'no xaccount registered'
         })
     }
 }

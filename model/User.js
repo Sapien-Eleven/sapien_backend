@@ -6,6 +6,8 @@ const userSchema = new Schema({
     name: String,
     email: String,
     password: String,
+    wallet_address: String,
+    wl_expired_at: String,
     registered_at: String,
 });
 
