@@ -21,4 +21,8 @@ router.post('/checkWhitelisted', Controller.checkWhitelisted)
 router.post('/addXAccount', Controller.addTwitterAccout);
 router.post('/getXAccounts', Controller.getTwitterAccounts);
 
+// For Discord Accounts
+router.post('/addDiscordAccount', Controller.addDiscordAccount);
+router.post('/getDiscordAccounts', Controller.getDiscordAccounts);
+
 module.exports = router;

@@ -4,6 +4,7 @@ const Counters = require('../model/Counter');
 const md5 = require("md5");
 const moment = require("moment");
 const XAccounts = require("../model/XAccount");
+const DiscordAccounts = require("../model/DiscordAccount");
 
 exports.signup = async (req, res) => {
     const name = req.body.name;
@@ -289,6 +290,49 @@ exports.getTwitterAccounts = async (req, res) => {
         res.send({
             status: 'success',
             xaccounts
+        })
+    } else {
+        res.send({
+            status: 'empty',
+            comment: 'no xaccount registered'
+        })
+    }
+}
+
+exports.addDiscordAccount = async (req, res) => {
+    const user_id = req.body.user_id;
+    const username = req.body.username;
+    const email = req.body.email;
+    const name = req.body.name;
+    const joined_at = req.body.joined_at;
+
+    const account = (await DiscordAccounts.find({username}).exec());
+    if (account.length > 0) {
+        res.send({
+            status: 'existed',
+            comment: 'already existed'
+        })
+    } else {
+        const newAccount = DiscordAccounts({user_id, username, name, email, joined_at});
+        const result = await newAccount.save();
+        if (result !== undefined) {
+            res.send({
+                status: 'success'
+            })
+        } else {
+            res.send({
+                status: 'Error Found'
+            })
+        }
+    }
+}
+
+exports.getDiscordAccounts = async (req, res) => {
+    const discord_accounts = await DiscordAccounts.find({}, {__v: 0}).exec();
+    if (discord_accounts.length > 0) {
+        res.send({
+            status: 'success',
+            discord_accounts
         })
     } else {
         res.send({
