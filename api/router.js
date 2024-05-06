@@ -15,7 +15,8 @@ router.post('/getWhitelists', Controller.getWhitelists)
 router.post('/addWalletAddress', Controller.addWalletAddress)
 router.post('/deleteWalletAddress', Controller.deleteWalletAddress)
 router.post('/updateWhitelist', Controller.updateWhitelist)
-router.post('/checkWhitelisted', Controller.checkWhitelisted)
+router.post('/checkWhitelistedById', Controller.checkWhitelistedById)
+router.post('/checkWhitelistedByWallet', Controller.checkWhitelistedByWallet)
 
 // For Twitter Accounts
 router.post('/addXAccount', Controller.addTwitterAccout);

@@ -234,11 +234,31 @@ exports.updateWhitelist = async (req, res) => {
     }
 }
 
-exports.checkWhitelisted = async (req, res) => {
-    const wallet_address = req.body.wallet_address;
-    const item = await Whitelists.findOne({wallet_address}).exec();
+exports.checkWhitelistedById = async (req, res) => {
+    const user_id = req.body.id;
+    const item = await Users.findOne({_id: user_id}).exec();
     if (item !== undefined) {
-        if (!moment().isAfter(moment(item.expired_at, 'DD/MM/YYYY').toDate(), 'day')) {
+        if (!moment().isAfter(moment(item.wl_expired_at, 'DD/MM/YYYY').toDate(), 'day')) {
+            res.send({status: 'success'})
+        } else {
+            res.send({
+                status: 'not whitelisted',
+                comment: 'This wallet address is not whitelisted'
+            })
+        }
+    } else {
+        res.send({
+            status: 'not whitelisted',
+            comment: 'This wallet address is not whitelisted'
+        })
+    }
+}
+
+exports.checkWhitelistedByWallet = async (req, res) => {
+    const wallet_address = req.body.wallet_address;
+    const item = await Users.findOne({wallet_address}).exec();
+    if (item !== undefined) {
+        if (!moment().isAfter(moment(item.wl_expired_at, 'DD/MM/YYYY').toDate(), 'day')) {
             res.send({status: 'success'})
         } else {
             res.send({
